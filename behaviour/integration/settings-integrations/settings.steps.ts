@@ -1,6 +1,3 @@
-/* eslint-disable */
-
-/* eslint-disable max-len */
 import { Given, When, Then, Before } from "@cucumber/cucumber";
 import { expect } from "chai";
 import type * as vscode from "vscode";
@@ -51,194 +48,377 @@ Given("the settings manager is initialized", () => {
   expect(settingsManager).to.exist;
 });
 
-When("the settings manager is initialized", () => {
-  expect(settingsManager).to.exist;
+Given("the workspace is ready", async () => {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  expect(workspaceFolders).to.exist;
+  expect(workspaceFolders.length).to.be.greaterThan(0);
 });
 
-Then("it should load the default settings", async () => {
-  const settings = await settingsManager.resetSettings();
-  expect(settings).to.exist;
+Given("the filesystem access is available", async () => {
+  const fs = require('fs');
+  const testFilePath = path.join(vscode.workspace.rootPath, 'test.txt');
+  fs.writeFileSync(testFilePath, 'test');
+  const fileExists = fs.existsSync(testFilePath);
+  expect(fileExists).to.be.true;
+  fs.unlinkSync(testFilePath);
 });
 
-When("I request the global configuration", async () => {
-  const config = await settingsManager.resetSettings(
-    ConfigurationTarget.Global
-  );
-  expect(config).to.exist;
-});
+// Scenario: Global Settings Integration
 
-Then("it should return the workspace settings", async () => {
-  const settings = await settingsManager.resetSettings(
-    ConfigurationTarget.Workspace
-  );
-  expect(settings).to.exist;
-});
-
-Given("global extension settings exist", async () => {
-  await TestHelper.setupGlobalSettings();
-});
-
-When("settings are loaded from VSCode", async () => {
-  await settingsManager.getCurrentConfiguration();
-});
-
-Then("global configurations should be retrieved", () => {
-  const config = settingsManager.getGlobalConfiguration();
-  expect(config).to.not.be.undefined;
-});
-
-Then("default values should be applied where missing", () => {
-  const config = settingsManager.getGlobalConfiguration();
-  expect(config.logFormat).to.equal("default");
-  expect(config.maxFileSize).to.equal("100MB");
-});
-
-Given("a workspace is active", async () => {
-  await TestHelper.setupWorkspace();
-});
-
-When("workspace-specific settings are configured", async () => {
-  await TestHelper.configureWorkspaceSettings({
-    logFormat: "custom",
-    logLocation: "./logs",
+  Given("global extension settings exist", async () => {
+    await TestHelper.createGlobalSettings();
+    const settings = await TestHelper.getGlobalSettings();
+    expect(settings).to.exist;
   });
+
+  When("settings are loaded from VSCode", async () => {
+    await settingsManager.loadSettings();
+  });
+
+  Then("global configurations should be retrieved", async () => {
+    const settings = await settingsManager.getSettings();
+    expect(settings).to.exist;
+  });
+
+  Then("default values should be applied where missing", async () => {
+    const settings = await settingsManager.getSettings();
+    const defaultSettings = await TestHelper.getDefaultSettings();
+    for (const key in defaultSettings) {
+      if (!settings[key]) {
+        expect(settings[key]).to.equal(defaultSettings[key]);
+      }
+    }
+  });
+
+  Then("settings should be type-validated", async () => {
+    const settings = await settingsManager.getSettings();
+    const validationResult = await TestHelper.validateSettings(settings);
+    expect(validationResult).to.be.true;
+  });
+
+  Then("changes should be persisted to global state", async () => {
+    const newSettings = { someSetting: "newValue" };
+    await settingsManager.updateSettings(newSettings);
+    const updatedSettings = await settingsManager.getSettings();
+    expect(updatedSettings.someSetting).to.equal("newValue");
+  });
+
+// Scenario: Workspace Settings Integration
+Given("a workspace is active", async () => {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  expect(workspaceFolders).to.exist;
+  expect(workspaceFolders.length).to.be.greaterThan(0);
 });
 
-Then("workspace settings should override globals", async () => {
-  const settings = await settingsManager.getCurrentConfiguration();
-  expect(settings.logFormat).to.equal("custom");
-});
+  When("workspace-specific settings are configured", async () => {
+    const workspaceSettings = { someWorkspaceSetting: "workspaceValue" };
+    await settingsManager.updateWorkspaceSettings(workspaceSettings);
+  });
 
-Given("the log format manager is initialized", () => {
-  expect(logFormatManager).to.exist;
-});
+  Then("workspace settings should override globals", async () => {
+    const globalSettings = await settingsManager.getSettings();
+    const workspaceSettings = await settingsManager.getWorkspaceSettings();
+    expect(workspaceSettings.someWorkspaceSetting).to.not.equal(globalSettings.someWorkspaceSetting);
+  });
 
-When("I load the log formats", async () => {
-  await logFormatManager.getAvailableFormats();
-});
+  Then("workspace state should be preserved", async () => {
+    const workspaceState = await settingsManager.getWorkspaceState();
+    expect(workspaceState).to.exist;
+  });
 
-Then("it should return the current format", async () => {
-  const format = await logFormatManager.getFormat();
-  expect(format).to.exist;
-});
+  Then("changes should affect only current workspace", async () => {
+    const workspaceSettings = await settingsManager.getWorkspaceSettings();
+    const otherWorkspaceSettings = await settingsManager.getOtherWorkspaceSettings();
+    expect(workspaceSettings.someWorkspaceSetting).to.not.equal(otherWorkspaceSettings.someWorkspaceSetting);
+  });
+
+  Then("settings should sync across workspace files", async () => {
+    const workspaceSettings = await settingsManager.getWorkspaceSettings();
+    const syncedSettings = await settingsManager.getSyncedWorkspaceSettings();
+    expect(workspaceSettings).to.deep.equal(syncedSettings);
+  });
+
+// Scenario: Log Format Settings Integration
 
 Given("log format configurations exist", async () => {
-  await logFormatManager.init();
+  await TestHelper.createLogFormatConfigurations();
+  const logFormats = await TestHelper.getLogFormatConfigurations();
+  expect(logFormats).to.exist;
 });
 
-When("log format settings are loaded", async () => {
-  await logFormatManager.getAvailableFormats();
-});
-
-Then("parser should use correct format", async () => {
-  const format = await logFormatManager.getFormat();
-  expect(format).to.have.property("pattern");
-});
-
-Given("the log location manager is initialized", () => {
-  expect(logLocationManager).to.exist;
-});
-
-When("I load the log locations", async () => {
-  await logLocationManager.getLocations();
-});
-
-Then("it should return valid locations", async () => {
-  const locations = await logLocationManager.getLocations();
-  expect(locations).to.exist;
-  locations.forEach((location: string) => {
-    expect(location).to.be.a("string").and.not.empty;
+  When("log format settings are loaded", async () => {
+    await logFormatManager.loadSettings();
   });
-});
+
+  Then("parser should use correct format", async () => {
+    const logFormat = await logFormatManager.getCurrentFormat();
+    const expectedFormat = await TestHelper.getExpectedLogFormat();
+    expect(logFormat).to.equal(expectedFormat);
+  });
+
+  Then("format validation should occur", async () => {
+    const logFormat = await logFormatManager.getCurrentFormat();
+    const isValid = await logFormatManager.validateFormat(logFormat);
+    expect(isValid).to.be.true;
+  });
+
+  Then("invalid formats should be rejected", async () => {
+    const invalidFormat = "invalidFormat";
+    const isValid = await logFormatManager.validateFormat(invalidFormat);
+    expect(isValid).to.be.false;
+  });
+
+  Then("format changes should update parser behavior", async () => {
+    const newFormat = "newFormat";
+    await logFormatManager.updateFormat(newFormat);
+    const currentFormat = await logFormatManager.getCurrentFormat();
+    expect(currentFormat).to.equal(newFormat);
+  });
+
+// Scenario: Log Location Settings Integration
 
 Given("log file locations are configured", async () => {
-  await TestHelper.setupLogLocations();
+  await TestHelper.createLogLocationConfigurations();
+  const logLocations = await TestHelper.getLogLocationConfigurations();
+  expect(logLocations).to.exist;
 });
 
-When("location settings are loaded", async () => {
-  await logLocationManager.getLocations();
-});
-
-Then("filesystem paths should be validated", async () => {
-  const locations = await logLocationManager.getValidLocations();
-  expect(locations).to.be.an("array");
-  locations.forEach((location: string) => {
-    expect(path.isAbsolute(location)).to.be.true;
+  When("location settings are loaded", async () => {
+    await logLocationManager.loadSettings();
   });
-});
+
+  Then("filesystem paths should be validated", async () => {
+    const logLocations = await logLocationManager.getLogLocations();
+    for (const location of logLocations) {
+      const isValid = await logLocationManager.validatePath(location);
+      expect(isValid).to.be.true;
+    }
+  });
+
+  Then("relative paths should be resolved", async () => {
+    const logLocations = await logLocationManager.getLogLocations();
+    for (const location of logLocations) {
+      const resolvedPath = await logLocationManager.resolvePath(location);
+      expect(path.isAbsolute(resolvedPath)).to.be.true;
+    }
+  });
+
+  Then("invalid paths should be reported", async () => {
+    const invalidPath = "invalid/path";
+    const isValid = await logLocationManager.validatePath(invalidPath);
+    expect(isValid).to.be.false;
+  });
+
+  Then("location changes should trigger reload", async () => {
+    const newLocation = "new/log/location";
+    await logLocationManager.updateLocation(newLocation);
+    const currentLocation = await logLocationManager.getCurrentLocation();
+    expect(currentLocation).to.equal(newLocation);
+    const reloadTriggered = await logLocationManager.isReloadTriggered();
+    expect(reloadTriggered).to.be.true;
+  });
+
+// Scenario: Workspace Detection Settings
 
 Given("multiple workspace folders exist", async () => {
-  await TestHelper.setupMultiRootWorkspace();
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  expect(workspaceFolders).to.exist;
+  expect(workspaceFolders.length).to.be.greaterThan(1);
 });
 
-When("workspace detection runs", async () => {
-  await workspaceDetectionManager.detectWorkspaces();
-});
+  When("workspace detection runs", async () => {
+    await workspaceDetectionManager.detectWorkspaces();
+  });
 
-Then("correct workspace should be identified", async () => {
-  const workspace = await workspaceDetectionManager.getCurrentWorkspace();
-  expect(workspace).to.exist;
-});
+  Then("correct workspace should be identified", async () => {
+    const detectedWorkspace = await workspaceDetectionManager.getDetectedWorkspace();
+    const expectedWorkspace = await TestHelper.getExpectedWorkspace();
+    expect(detectedWorkspace).to.equal(expectedWorkspace);
+  });
+
+  Then("workspace settings should be loaded", async () => {
+    const workspaceSettings = await workspaceDetectionManager.getWorkspaceSettings();
+    expect(workspaceSettings).to.exist;
+  });
+
+  Then("workspace state should be initialized", async () => {
+    const workspaceState = await workspaceDetectionManager.getWorkspaceState();
+    expect(workspaceState).to.exist;
+  });
+
+  Then("detection results should be cached", async () => {
+    const cachedResults = await workspaceDetectionManager.getCachedDetectionResults();
+    expect(cachedResults).to.exist;
+    const detectedWorkspace = await workspaceDetectionManager.getDetectedWorkspace();
+    expect(cachedResults).to.include(detectedWorkspace);
+  });
+
+// Scenario: General Configuration Integration
 
 Given("general configurations are defined", async () => {
-  await generalConfigManager.init();
+  await TestHelper.createGeneralConfigurations();
+  const generalConfigurations = await TestHelper.getGeneralConfigurations();
+  expect(generalConfigurations).to.exist;
 });
 
-When("configuration changes occur", async () => {
-  await TestHelper.triggerConfigChange("browsechat.general.theme", "dark");
-});
+  When("configuration changes occur", async () => {
+    const newConfig = { someConfig: "newValue" };
+    await generalConfigManager.updateConfiguration(newConfig);
+  });
 
-Then("all components should be notified", () => {
-  expect(TestHelper.getConfigChangeNotifications()).to.have.length.greaterThan(
-    0
-  );
-});
+  Then("all components should be notified", async () => {
+    const notifications = await generalConfigManager.getNotifications();
+    expect(notifications).to.include("Configuration updated");
+  });
 
-When("I validate the settings", async () => {
-  const isValid = await settingsManager.validate();
-  expect(isValid).to.be.true;
-});
+  Then("dependent systems should update", async () => {
+    const dependentSystemState = await generalConfigManager.getDependentSystemState();
+    expect(dependentSystemState).to.equal("updated");
+  });
+
+  Then("configuration state should be consistent", async () => {
+    const configState = await generalConfigManager.getConfigurationState();
+    expect(configState).to.be.consistent;
+  });
+
+  Then("changes should be properly logged", async () => {
+    const logs = await generalConfigManager.getLogs();
+    expect(logs).to.include("Configuration change: someConfig = newValue");
+  });
+
+// Scenario: Settings Migration
 
 Given("old settings format exists", async () => {
-  await TestHelper.setupLegacySettings();
+  await TestHelper.createOldSettingsFormat();
+  const oldSettings = await TestHelper.getOldSettingsFormat();
+  expect(oldSettings).to.exist;
 });
 
 When("settings migration is triggered", async () => {
-  await settingsManager.migrate("0.9.0");
+  await settingsManager.migrateSettings();
 });
 
 Then("settings should be converted correctly", async () => {
-  const newSettings = await settingsManager.getCurrentConfiguration();
-  expect(newSettings.version).to.equal("1.0.0");
+  const newSettings = await settingsManager.getSettings();
+  const expectedSettings = await TestHelper.getExpectedNewSettings();
+  expect(newSettings).to.deep.equal(expectedSettings);
 });
+
+Then("old settings should be preserved", async () => {
+  const oldSettings = await settingsManager.getOldSettings();
+  expect(oldSettings).to.exist;
+});
+
+Then("new format should be validated", async () => {
+  const newSettings = await settingsManager.getSettings();
+  const isValid = await settingsManager.validateSettings(newSettings);
+  expect(isValid).to.be.true;
+});
+
+Then("migration should be logged", async () => {
+  const logs = await settingsManager.getLogs();
+  expect(logs).to.include("Settings migration completed");
+});
+
+// Scenario: Settings Persistence
 
 Given("settings changes are made", async () => {
-  await settingsManager.update(
-    "theme",
-    "dark",
-    ConfigurationTarget.Global
-  );
+  const newSettings = { someSetting: "newValue" };
+  await settingsManager.updateSettings(newSettings);
 });
 
-When("VSCode is restarted", async () => {
-  await TestHelper.simulateVSCodeRestart(context);
-});
+  When("VSCode is restarted", async () => {
+    await TestHelper.restartVSCode();
+  });
 
-Then("all settings should be restored", async () => {
-  const settings = await settingsManager.getCurrentConfiguration();
-  expect(settings.theme).to.equal("dark");
-});
+  Then("all settings should be restored", async () => {
+    const settings = await settingsManager.getSettings();
+    expect(settings.someSetting).to.equal("newValue");
+  });
+
+  Then("custom states should persist", async () => {
+    const customState = await settingsManager.getCustomState();
+    expect(customState).to.exist;
+  });
+
+  Then("file locations should remain valid", async () => {
+    const fileLocations = await logLocationManager.getLogLocations();
+    for (const location of fileLocations) {
+      const isValid = await logLocationManager.validatePath(location);
+      expect(isValid).to.be.true;
+    }
+  });
+
+  Then("configurations should be consistent", async () => {
+    const configState = await generalConfigManager.getConfigurationState();
+    expect(configState).to.be.consistent;
+  });
+
+// Scenario: Settings Error Handling
 
 Given("invalid settings are introduced", async () => {
-  await TestHelper.introduceInvalidSettings();
+  const invalidSettings = { someSetting: null };
+  await settingsManager.updateSettings(invalidSettings);
 });
 
 When("settings validation occurs", async () => {
-  const isValid = await settingsManager.validate();
-  expect(isValid).to.be.false;
+  await settingsManager.validateSettings();
 });
 
-Then("appropriate errors should be shown", () => {
-  const errors = TestHelper.getValidationErrors();
-  expect(errors).to.have.length.greaterThan(0);
+Then("appropriate errors should be shown", async () => {
+  const errors = await settingsManager.getValidationErrors();
+  expect(errors).to.include("Invalid value for someSetting");
 });
+
+Then("default values should be used", async () => {
+  const settings = await settingsManager.getSettings();
+  const defaultSettings = await TestHelper.getDefaultSettings();
+  expect(settings.someSetting).to.equal(defaultSettings.someSetting);
+});
+
+Then("error state should be logged", async () => {
+  const logs = await settingsManager.getLogs();
+  expect(logs).to.include("Error: Invalid value for someSetting");
+});
+
+Then("recovery should be possible", async () => {
+  const recoveryState = await settingsManager.recoverFromError();
+  expect(recoveryState).to.be.true;
+});
+
+// Scenario: Multi-Root Workspace Settings
+
+Given("multiple workspace roots exist", async () => {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  expect(workspaceFolders).to.exist;
+  expect(workspaceFolders.length).to.be.greaterThan(1);
+});
+
+  When("settings are accessed", async () => {
+    await settingsManager.loadSettings();
+  });
+
+  Then("correct scope should be determined", async () => {
+    const scope = await settingsManager.getCurrentScope();
+    expect(scope).to.exist;
+    expect(scope).to.be.oneOf(["global", "workspace", "root-specific"]);
+  });
+
+  Then("root-specific settings should apply", async () => {
+    const rootSettings = await settingsManager.getRootSettings();
+    expect(rootSettings).to.exist;
+    const currentScope = await settingsManager.getCurrentScope();
+    if (currentScope === "root-specific") {
+      expect(rootSettings).to.deep.equal(await settingsManager.getSettings());
+    }
+  });
+
+  Then("global settings should be preserved", async () => {
+    const globalSettings = await settingsManager.getGlobalSettings();
+    expect(globalSettings).to.exist;
+  });
+
+  Then("scope conflicts should be resolved", async () => {
+    const conflicts = await settingsManager.getScopeConflicts();
+    expect(conflicts).to.be.empty;
+  });

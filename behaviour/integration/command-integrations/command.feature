@@ -3,7 +3,7 @@ Feature: Command Integration with VSCode, UI, Data Model and Navigation
     I want to ensure proper integration between Commands and other components
     So that user actions are properly handled and executed
 
-    Background:
+    Background: Command Integration Setup
         Given the VSCode extension context is initialized
         And the command manager is registered
         And the data model is ready
