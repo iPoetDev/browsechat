@@ -3,7 +3,7 @@ Feature: Models Component Integration
     I want to ensure proper integration between all Models components
     So that chat data is properly managed and maintained
 
-    Background:
+    Background: Data Model Initialization
         Given the data model manager is initialized
         And the chat metadata system is ready
         And the event system is configured

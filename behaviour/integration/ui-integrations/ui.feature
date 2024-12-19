@@ -81,3 +81,11 @@ Feature: UI Integration with VSCode API and Services
         And UI should remain responsive
         And error state should be recoverable
         And error details should be logged
+
+    Scenario: UI Cleanup
+        Given the extension is configured for cleanup
+        When the extension is deactivated
+        Then component states should be saved
+        And temporary files should be deleted
+        And event listeners should be removed
+        And background processes should be terminated
