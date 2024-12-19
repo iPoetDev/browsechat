@@ -1,0 +1,13 @@
+.vscode/*
+.vscodeignore
+browsechat.code-workspace
+out
+dist
+node_modules
+.vscode-test/
+test-workspace
+*.vsix
+.bak
+.sonarlint
+.vscode-test/**
+vsc-*.md

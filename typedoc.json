@@ -1,0 +1,142 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "name": "TypeDoc Pages Plugin",
+    "readme": "./docs/source/introduction.md",
+    "theme": "default",
+    "entryPoints": [
+        "src/parser/ChatParser.ts", 
+        "src/models/DataModelManager.ts", 
+        "src/ui/ChatNavigationManager.ts",
+        "src/command/ChatCommandManager.ts",
+        "src/settings/SettingsIntegrationManager.ts",
+        "src/utils/security.ts",
+        "src/settings/GeneralConfigurationManager.ts",
+        "src/settings/LogFormatManager.ts",
+        "src/ui/SearchManager.ts",
+        "src/commands/ExportChatCommand.ts",
+        "src/models/DataModelManager.ts"
+    ],
+    "out": "./docs/extension",
+    "commentStyle": "jsdoc",
+    "jsDocCompatibility": {
+        "exampleTag": true,
+        "defaultTag": true,
+        "inheritDocTag": true,
+        "ignoreUnescapedBraces": true
+    },
+    "inlineTags": [
+        "@link",
+        "@inheritDoc",
+        "@label",
+        "@linkcode",
+        "@linkplain",
+        "@include",
+        "@includeCode",
+        "@readonly",
+    ],
+    "blockTags": [
+        "@defaultValue",
+        "@deprecated",
+        "@example",
+        "@param",
+        "@privateRemarks",
+        "@remarks",
+        "@returns",
+        "@see",
+        "@throws",
+        "@typeParam",
+        "@author",
+        "@callback",
+        "@category",
+        "@categoryDescription",
+        "@default",
+        "@document",
+        "@extends",
+        "@augments",
+        "@yields",
+        "@group",
+        "@groupDescription",
+        "@import",
+        "@inheritDoc",
+        "@jsx",
+        "@license",
+        "@module",
+        "@mergeModuleWith",
+        "@prop",
+        "@property",
+        "@return",
+        "@satisfies",
+        "@since",
+        "@template",
+        "@type",
+        "@typedef",
+        "@summary",
+        //        "@explains"
+    ],
+    "sort": [
+        "kind",
+        "instance-first",
+        "alphabetical-ignoring-documents"
+    ],
+    // typedoc.json
+    "kindSortOrder": [
+        "Reference",
+        "Project",
+        "Module",
+        "Namespace",
+        "Enum",
+        "EnumMember",
+        "Class",
+        "Interface",
+        "TypeAlias",
+        "Constructor",
+        "Property",
+        "Variable",
+        "Function",
+        "Accessor",
+        "Method",
+        "Parameter",
+        "TypeParameter",
+        "TypeLiteral",
+        "CallSignature",
+        "ConstructorSignature",
+        "IndexSignature",
+        "GetSignature",
+        "SetSignature"
+    ],
+    "validation": {
+        "notExported": true,
+        "invalidLink": false,
+        "rewrittenLink": false,
+        "notDocumented": true,
+        "unusedMergeModuleWith": true
+    },
+    "outputs": [
+        {
+            "name": "html",
+            "path": "./docs/extension/html",
+            "options": {
+                "navigation": {
+                    "includeCategories": true,
+                    "includeGroups": true,
+                    "excludeReferences": false,
+                    "includeFolders": true
+                }
+            }
+        },
+        {
+            "name": "json",
+            "path": "./docs/extension/json/docs.json",
+            "pretty": true
+        },
+        {
+            // requires typedoc-plugin-markdown
+            "name": "markdown",
+            "path": "./docs/extension/markdown"
+        }
+    ],
+    // "markdownItOptions": {
+    //     "html": true,
+    //     "linkify": true
+    // },
+}

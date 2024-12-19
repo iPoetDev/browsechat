@@ -1,0 +1,60 @@
+{
+	"compilerOptions": {
+        "module": "ESNext",
+        "target": "ES2022",
+        "moduleResolution": "node",
+		"esModuleInterop": true,
+        "experimentalDecorators": true,
+		"allowSyntheticDefaultImports": true /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */,
+		"resolveJsonModule": true,
+		"sourceMap": true,
+		"lib": [
+			"ES2022",
+			"DOM"
+		],
+		"rootDir": ".",
+		"outDir": "out",
+		"strict": true, /* enable all strict type-checking options */
+		"skipLibCheck": true,
+		"strictNullChecks": false,
+		"forceConsistentCasingInFileNames": true,
+		"isolatedModules": true,
+		"baseUrl": ".",
+		"types": [
+			"jest",
+			"node",
+			"vscode",
+			"mocha",
+			"chai"
+		],
+		"typeRoots": ["node_modules/@types"],
+		// JSDocs support
+		"allowJs": true,
+		"checkJs": true,
+		"declaration": true,
+		"declarationDir": "types",
+		"paths": {
+			"@src/*": ["src/*"], // Alias for the src directory
+			"@commands/*": ["src/commands/*"], // Alias for the commands directory
+			"@settings/*": ["src/settings/*"], // Alias for the settings directory
+			"@models/*": ["src/models/*"], // Alias for the models directory
+			"@ui/*": ["src/ui/*"], // Alias for the ui directory
+			"@utils/*": ["src/utils/*"] // Alias for the utils directory
+		  }
+	},
+	"typedocOptions": {
+		"entryPoints": ["src/**/*.ts"],
+		"out": "docs/extension"
+	},
+	"exclude": [
+		".vscode-test",
+		"out",
+		"dist",
+		".bak"
+	],
+	"include": [
+		"src/**/*",
+		"tests/**/*",
+		"behaviour/integration/**/*.ts"
+	]
+}

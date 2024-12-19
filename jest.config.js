@@ -1,0 +1,66 @@
+/** @type {import('ts-jest').JestConfigWithTsJest} */
+module.exports = {
+  preset: "ts-jest",
+  testEnvironment: "node",
+  roots: ["<rootDir>/tests", "<rootDir>/src"],
+  testMatch: [
+    "**/__tests__/**/*.+(ts|tsx|js)",
+    "**/tests/**/*.+(ts|tsx|js)",
+    "**/?(*.)+(spec|test).+(ts|tsx|js)",
+  ],
+  collectCoverageFrom: ["src/**/*.ts", "!src/**/*.d.ts", "!src/test/**"],
+  coverageThreshold: {
+    global: {
+      statements: 85,
+      branches: 85,
+      functions: 90,
+      lines: 85,
+    },
+  },
+  setupFilesAfterEnv: ["./tests/setup.ts"],
+  moduleFileExtensions: ["ts", "js", "json", "node"],
+  transform: {
+    "^.+\\.tsx?$": [
+      "ts-jest",
+      {
+        tsconfig: "tsconfig.json",
+        diagnostics: true,
+        isolatedModules: true,
+        stringifyContentPathRegex: "\\.ts$",
+      },
+    ],
+  },
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/dist/",
+    "/.vscode-test/",
+    ,
+    "/coverage/",
+    "/reports/",
+    "/tests/mocks/v1/",
+    "/tests/unit/models/v1/",
+    "/tests/unit/parser/v1/",
+  ],
+  modulePathIgnorePatterns: [
+    "/.vscode-test/",
+    "/dist/",
+    "/coverage/",
+    "/reports/",
+    "/tests/mocks/v1/",
+    "/tests/unit/models/v1/",
+    "/tests/unit/parser/v1/",
+  ],
+  watchPathIgnorePatterns: [
+    "/.vscode-test/",
+    "/dist/",
+    "/coverage/",
+    "/reports/",
+    "/node_modules/",
+    "/tests/mocks/v1/",
+    "/tests/unit/models/v1/",
+    "/tests/unit/parser/v1/",
+  ],
+  verbose: true,
+  testTimeout: 10000,
+  maxWorkers: "50%",
+};

@@ -1,0 +1,109 @@
+{
+  "name": "browsechat",
+  "displayName": "browsechat",
+  "description": "Browse IDE-LLM Chat agent (Windsurf only) logs for review and analytics",
+  "version": "0.0.1",
+  "publisher": "browsechat",
+  "private": true,
+  "engines": {
+    "vscode": "^1.94.0",
+    "vscodium": "^1.94.0",
+    "windsurf": "^1.1.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "type": "module",
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  "activationEvents": [
+    "*",
+    "onLanguage:log"
+  ],
+  "main": "./dist/extension.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/browsechat"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "browsechat.helloWorld",
+        "title": "Hello World from BrowseChat"
+      },
+      {
+        "command": "browsechat.openChatBrowser",
+        "title": "Open Chat Browser"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "resourceExtname == .log",
+          "command": "browsechat.openChatBrowser",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "jest --config jest.config.js --watchAll",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --c ./src/**/*.ts",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:unit": "jest --config jest.config.js",
+    "test:unit:coverage": "jest --config jest.config.js --coverage",
+    "test:unit:watch": "jest --config jest.config.js --watch",
+    "test:e2e": "node ./out/test/runTest.js",
+    "test:integration": "node --import \"data:text/javascript,import { register } from 'node:module'; import { pathToFileURL } from 'node:url'; register('ts-node/esm', pathToFileURL('./'));\" node_modules/mocha/bin/mocha behaviour/integration/**/*.ts",
+    "test:int": "node --experimental-vm-modules --loader ts-node/esm --no-warnings node_modules/mocha/bin/mocha \"behaviour/integration/**/*.ts\" --require ts-node/register",
+    "test:int2": "node --experimental-vm-modules --loader ts-node/esm --trace-warnings node_modules/mocha/bin/mocha \"behaviour/integration/**/*.ts\" --require ts-node/register",
+    "test:integration:watch": "node --loader ts-node/esm node_modules/mocha/bin/mocha behaviour/integration/**/** --watch",
+    "spec": "behaviour/integration/**/*.spec.ts",
+    "watch-files": "behaviour/integration/**/*.ts"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.20",
+    "@types/glob": "^8.1.0",
+    "@types/highlight.js": "^10.1.0",
+    "@types/jest": "^29.5.14",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.96.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "@vscode/test-electron": "^2.4.1",
+    "chai": "^4.5.0",
+    "eslint": "^8.57.1",
+    "glob": "^9.0.0",
+    "highlight.js": "^11.11.0",
+    "jest": "^29.7.0",
+    "jest-watch-typeahead": "^2.2.2",
+    "jsdoc-plugin-typescript": "^3.2.0",
+    "mocha": "^10.8.2",
+    "mocha-gherkin": "^0.2.0",
+    "ts-jest": "^29.2.5",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
+    "typedoc": "^0.27.5",
+    "typedoc-plugin-markdown": "^4.3.3",
+    "typedoc-plugin-pages": "^1.1.0",
+    "typescript": "^5.7.2",
+    "vscode-test": "^1.6.1",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@types/highlight.js": "^10.1.0",
+    "@types/jest": "^29.5.14",
+    "highlight.js": "^11.11.0",
+    "nyc": "^17.1.0"
+  }
+}
